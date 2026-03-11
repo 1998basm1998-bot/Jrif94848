@@ -2,17 +2,19 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>منفذ ماستر المومل - نظام الجرد والمبيعات</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1e3a8a; /* أزرق داكن فخم */
-            --secondary: #10b981; /* أخضر مريح للمبيعات */
+            --primary: #1e3a8a; /* أزرق فخم */
+            --primary-light: #3b82f6;
+            --secondary: #10b981; /* أخضر للبيع */
             --bg-color: #f3f4f6;
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
+            --nav-bg: #ffffff;
         }
 
         * {
@@ -20,34 +22,39 @@
             margin: 0;
             padding: 0;
             font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent; /* إزالة مربع التحديد عند اللمس في الهواتف */
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
-            padding-bottom: 30px;
+            /* ترك مسافة في الأسفل لكي لا يغطي الشريط السفلي المحتوى */
+            padding-bottom: 80px; 
         }
 
         /* Header Styles */
         header {
             background-color: var(--primary);
             color: white;
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 100;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
         }
 
         header h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
+            margin-bottom: 2px;
         }
 
         header p {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #bfdbfe;
         }
 
@@ -58,31 +65,57 @@
             padding: 0 15px;
         }
 
+        /* Tabs and Animation */
+        .tab-content {
+            display: none; /* إخفاء كل الأقسام افتراضياً */
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .tab-content.active {
+            display: block; /* إظهار القسم النشط فقط */
+        }
+
+        @keyframes slideUpFade {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         /* Quick Stats (الجرد السريع) */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background-color: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
+            padding: 15px 10px;
+            border-radius: 15px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border-right: 4px solid var(--secondary);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+            border-bottom: 4px solid var(--secondary);
+            transition: transform 0.2s;
         }
 
+        .stat-card:nth-child(2) { border-bottom-color: #f59e0b; }
+        .stat-card:nth-child(3) { border-bottom-color: #ef4444; grid-column: span 2; }
+
         .stat-card h3 {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
+            font-weight: 600;
         }
 
         .stat-card p {
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-size: 1.3rem;
+            font-weight: 800;
             color: var(--primary);
             margin-top: 5px;
         }
@@ -90,24 +123,20 @@
         /* Section Cards */
         .card {
             background-color: var(--card-bg);
-            border-radius: 15px;
+            border-radius: 18px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            transition: transform 0.3s ease;
-        }
-
-        .card:active {
-            transform: scale(0.98); /* تأثير ضغطة ناعم للهاتف */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            margin-bottom: 15px;
         }
 
         .card-header {
             font-size: 1.2rem;
             font-weight: 800;
             color: var(--primary);
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--bg-color);
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         /* Form Elements */
@@ -117,63 +146,114 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
             font-size: 0.9rem;
+            color: #374151;
         }
 
-        .form-group input, 
-        .form-group select {
+        .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
+            padding: 14px;
+            border: 1.5px solid #e5e7eb;
+            background-color: #f9fafb;
+            border-radius: 12px;
             font-size: 1rem;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
-        .form-group input:focus, 
-        .form-group select:focus {
+        .form-group input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+            border-color: var(--primary-light);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         /* Button Styles */
         .btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             background-color: var(--secondary);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+            margin-top: 10px;
         }
 
-        .btn:hover {
-            background-color: #059669;
+        .btn:active {
+            transform: scale(0.96);
         }
 
         .btn-primary {
             background-color: var(--primary);
+            box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2);
         }
 
-        .btn-primary:hover {
-            background-color: #1e40af;
+        /* Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--nav-bg);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 5px 15px 5px; /* زيادة الحشوة السفلية لهواتف الايفون */
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
         }
 
-        /* Mobile specific adjustments */
-        @media (max-width: 480px) {
-            .card {
-                padding: 15px;
-            }
-            .btn {
-                padding: 15px; /* زر أكبر لتسهيل اللمس */
-            }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 25%;
+        }
+
+        .nav-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Active state for bottom nav */
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active .nav-icon {
+            transform: translateY(-4px) scale(1.1); /* حركة القفز للأيقونة النشطة */
+        }
+
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 20px;
+            height: 4px;
+            background-color: var(--primary);
+            border-radius: 4px;
+            margin-top: 2px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; width: 0; }
+            to { opacity: 1; width: 20px; }
         }
     </style>
 </head>
@@ -181,80 +261,136 @@
 
     <header>
         <h1>منفذ ماستر المومل</h1>
-        <p>للصرافة، المبيعات المباشرة، والأقساط</p>
+        <p>إدارة المبيعات والأقساط الذكية</p>
     </header>
 
     <div class="container">
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>مبيعات اليوم</h3>
-                <p>1,250,000 د.ع</p>
-            </div>
-            <div class="stat-card">
-                <h3>الديون (الأقساط)</h3>
-                <p>8,500 $</p>
-            </div>
-            <div class="stat-card">
-                <h3>ديون رأس الشهر</h3>
-                <p>3,200 $</p>
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="card">
+                <div class="card-header">📊 خلاصة الجرد المالي</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>مبيعات اليوم</h3>
+                        <p>1,250,000 د.ع</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>الديون (الأقساط)</h3>
+                        <p>8,500 $</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>ديون رأس الشهر</h3>
+                        <p>3,200 $</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">🛒 البيع المباشر</div>
-            <form>
-                <div class="form-group">
-                    <label>نوع المادة / الخدمة</label>
-                    <input type="text" placeholder="مثال: حوالة، كارتات، الخ...">
-                </div>
-                <div class="form-group">
-                    <label>المبلغ (دينار أو دولار)</label>
-                    <input type="number" placeholder="أدخل المبلغ">
-                </div>
-                <button type="button" class="btn">تسجيل البيع</button>
-            </form>
+        <div id="tab-direct-sale" class="tab-content">
+            <div class="card">
+                <div class="card-header">🛒 البيع المباشر</div>
+                <form>
+                    <div class="form-group">
+                        <label>نوع المادة / الخدمة</label>
+                        <input type="text" placeholder="مثال: حوالة، كارتات، أجهزة...">
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ (دينار أو دولار)</label>
+                        <input type="number" placeholder="أدخل المبلغ المستلم">
+                    </div>
+                    <button type="button" class="btn">تأكيد البيع السريع</button>
+                </form>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">📝 بيع ورق (أقساط)</div>
-            <form>
-                <div class="form-group">
-                    <label>اسم الزبون</label>
-                    <input type="text" placeholder="الاسم الثلاثي">
-                </div>
-                <div class="form-group">
-                    <label>عدد الأوراق (المبلغ بالدولار)</label>
-                    <input type="number" placeholder="مثال: 10 (يعني 1000$)">
-                </div>
-                <div class="form-group">
-                    <label>القسط الشهري المتفق عليه</label>
-                    <input type="number" placeholder="المبلغ المقطوع شهرياً">
-                </div>
-                <button type="button" class="btn btn-primary">حفظ عقد القسط</button>
-            </form>
+        <div id="tab-installments" class="tab-content">
+            <div class="card">
+                <div class="card-header">📝 بيع ورق (أقساط)</div>
+                <form>
+                    <div class="form-group">
+                        <label>اسم الزبون</label>
+                        <input type="text" placeholder="الاسم الثلاثي للزبون">
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الأوراق (المبلغ بالدولار)</label>
+                        <input type="number" placeholder="مثال: 10 (يعني 1000$)">
+                    </div>
+                    <div class="form-group">
+                        <label>القسط الشهري المتفق عليه</label>
+                        <input type="number" placeholder="المبلغ المقطوع شهرياً">
+                    </div>
+                    <button type="button" class="btn btn-primary">حفظ عقد القسط</button>
+                </form>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">📅 بيع ورق (رأس الشهر)</div>
-            <form>
-                <div class="form-group">
-                    <label>اسم الزبون</label>
-                    <input type="text" placeholder="الاسم الثلاثي">
-                </div>
-                <div class="form-group">
-                    <label>المبلغ المطلوب إرجاعه</label>
-                    <input type="number" placeholder="إجمالي المبلغ">
-                </div>
-                <div class="form-group">
-                    <label>تاريخ الاستحقاق (رأس الشهر)</label>
-                    <input type="date">
-                </div>
-                <button type="button" class="btn btn-primary">تسجيل دين رأس الشهر</button>
-            </form>
+        <div id="tab-end-month" class="tab-content">
+            <div class="card">
+                <div class="card-header">📅 بيع ورق (رأس الشهر)</div>
+                <form>
+                    <div class="form-group">
+                        <label>اسم الزبون</label>
+                        <input type="text" placeholder="الاسم الثلاثي للزبون">
+                    </div>
+                    <div class="form-group">
+                        <label>المبلغ المطلوب إرجاعه</label>
+                        <input type="number" placeholder="إجمالي المبلغ بالدولار">
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ الاستحقاق (رأس الشهر)</label>
+                        <input type="date">
+                    </div>
+                    <button type="button" class="btn btn-primary" style="background-color: #f59e0b;">تسجيل دين رأس الشهر</button>
+                </form>
+            </div>
         </div>
 
     </div>
 
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('tab-dashboard', this)">
+            <span class="nav-icon">📊</span>
+            <span>الجرد</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-direct-sale', this)">
+            <span class="nav-icon">🛒</span>
+            <span>مباشر</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-installments', this)">
+            <span class="nav-icon">📝</span>
+            <span>أقساط</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('tab-end-month', this)">
+            <span class="nav-icon">📅</span>
+            <span>رأس الشهر</span>
+        </div>
+    </nav>
+
+    <script>
+        function switchTab(tabId, element) {
+            // 1. إخفاء جميع الأقسام
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 2. إزالة الحالة النشطة من جميع أزرار الشريط السفلي
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // 3. إظهار القسم المطلوب مع الأنيميشن
+            document.getElementById(tabId).classList.add('active');
+
+            // 4. تفعيل الزر الذي تم الضغط عليه (لتغيير لونه وحركته)
+            element.classList.add('active');
+            
+            // اهتزاز خفيف للهاتف عند الضغط (يعمل على الأجهزة الداعمة)
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+    </script>
 </body>
 </html>
